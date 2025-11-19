@@ -1,4 +1,4 @@
-opipeline {
+pipeline {
     agent any
 
     tools {
@@ -10,7 +10,7 @@ opipeline {
 
         REGISTRY_URL = '10.80.5.127:9060'
         REGISTRY_REPO = 'demo'
-        IMAGE_NAME = 'test v.1'
+        IMAGE_NAME = 'test-v1'          // FIXED: no spaces allowed
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
@@ -39,16 +39,16 @@ opipeline {
             steps {
                 withCredentials([string(credentialsId: 'sonar-test-v1', variable: 'SONAR_TOKEN')]) {
                     withSonarQubeEnv('SonarQube') {
-                        sh '''
+                        sh """
                             npx sonar-scanner \
                                 -Dsonar.projectKey=test-v.1 \
                                 -Dsonar.sources=. \
                                 -Dsonar.host.url=${SONAR_HOST_URL} \
-                                -Dsonar.login=$SONAR_TOKEN \
+                                -Dsonar.token=${SONAR_TOKEN} \
                                 -Dsonar.exclusions=node_modules/**,coverage/**,**/*.test.js \
                                 -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
                                 -Dsonar.coverage.exclusions=**/*.test.js
-                        '''
+                        """
                     }
                 }
             }
@@ -67,7 +67,7 @@ opipeline {
                 sh """
                     docker build -t ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG} .
                     docker tag ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG} \
-                              ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:latest
+                               ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:latest
                 """
             }
         }
@@ -104,10 +104,3 @@ opipeline {
         }
     }
 }
-
-
-
-
-
-
-
