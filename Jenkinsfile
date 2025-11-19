@@ -37,7 +37,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withCredentials([string(credentialsId: 'demo', variable: 'SONAR_TOKEN')]) {
+                withCredentials([string(credentialsId: 'sonar-test-v1', variable: 'SONAR_TOKEN')]) {
                     withSonarQubeEnv('SonarQube') {
                         sh """
                             npx sonar-scanner \
@@ -104,3 +104,4 @@ pipeline {
         }
     }
 }
+
