@@ -6,11 +6,11 @@ pipeline {
     }
 
     environment {
-        SONAR_HOST_URL = 'http://10.80.5.127:9000'
+        SONAR_HOST_URL = 'http://10.80.5.127:9070'
 
-        REGISTRY_URL = '10.80.5.127:8082'
+        REGISTRY_URL = '10.80.5.127:9060'
         REGISTRY_REPO = 'demo'
-        IMAGE_NAME = 'demo-app'
+        IMAGE_NAME = 'test-v1'
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
@@ -41,7 +41,7 @@ pipeline {
                     withSonarQubeEnv('SonarQube') {
                         sh """
                             npx sonar-scanner \
-                                -Dsonar.projectKey=demo \
+                                -Dsonar.projectKey=test-v1 \
                                 -Dsonar.sources=. \
                                 -Dsonar.host.url=${SONAR_HOST_URL} \
                                 -Dsonar.token=${SONAR_TOKEN} \
@@ -91,12 +91,12 @@ pipeline {
         stage('Deploy Container') {
             steps {
                 sh """
-                    docker rm -f demo-app || true
+                    docker rm -f test-v1 || true
 
                     docker pull ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
 
                     docker run -d \
-                        --name demo-app \
+                        --name test-v1 \
                         -p 3000:3000 \
                         ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
                 """
@@ -104,5 +104,6 @@ pipeline {
         }
     }
 }
+
 
 
