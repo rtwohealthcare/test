@@ -1,4 +1,4 @@
-pipeline {
+opipeline {
     agent any
 
     tools {
@@ -10,7 +10,7 @@ pipeline {
 
         REGISTRY_URL = '10.80.5.127:9060'
         REGISTRY_REPO = 'demo'
-        IMAGE_NAME = 'test-v1'
+        IMAGE_NAME = 'demo-app'
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
@@ -91,12 +91,12 @@ pipeline {
         stage('Deploy Container') {
             steps {
                 sh """
-                    docker rm -f test-v1 || true
+                    docker rm -f demo-app || true
 
                     docker pull ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
 
                     docker run -d \
-                        --name test-v1 \
+                        --name demo-app \
                         -p 3000:3000 \
                         ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
                 """
@@ -104,6 +104,7 @@ pipeline {
         }
     }
 }
+
 
 
 
