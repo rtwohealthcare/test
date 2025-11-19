@@ -11,7 +11,7 @@ pipeline {
         
         SONAR_HOST_URL = 'http://10.80.5.127:9070'
 
-        REGISTRY_URL = '10.80.5.127:9060'
+        REGISTRY_URL = '10.80.5.127:9082'
         REGISTRY_REPO = 'docker-private'
         IMAGE_NAME = 'test-v1'          // FIXED: no spaces allowed
         IMAGE_TAG = "v${BUILD_NUMBER}"
@@ -107,5 +107,6 @@ pipeline {
         }
     }
 }
+
 
 
