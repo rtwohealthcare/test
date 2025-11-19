@@ -6,6 +6,9 @@ pipeline {
     }
 
     environment {
+        JAVA_HOME = "/usr/lib/jvm/java-17-openjdk-amd64"
+        PATH = "${JAVA_HOME}/bin:${PATH}"
+        
         SONAR_HOST_URL = 'http://10.80.5.127:9070'
 
         REGISTRY_URL = '10.80.5.127:9060'
@@ -104,4 +107,5 @@ pipeline {
         }
     }
 }
+
 
