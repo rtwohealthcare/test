@@ -41,7 +41,7 @@ pipeline {
                     withSonarQubeEnv('SonarQube') {
                         sh """
                             npx sonar-scanner \
-                                -Dsonar.projectKey=test-v1 \
+                                -Dsonar.projectKey=test-v.1
                                 -Dsonar.sources=. \
                                 -Dsonar.host.url=${SONAR_HOST_URL} \
                                 -Dsonar.token=${SONAR_TOKEN} \
@@ -104,6 +104,7 @@ pipeline {
         }
     }
 }
+
 
 
 
