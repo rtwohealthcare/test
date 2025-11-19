@@ -39,16 +39,16 @@ pipeline {
             steps {
                 withCredentials([string(credentialsId: 'sonar-test-v1', variable: 'SONAR_TOKEN')]) {
                     withSonarQubeEnv('SonarQube') {
-                        sh """
+                        sh '''
                             npx sonar-scanner \
-                                -Dsonar.projectKey=test-v.1
+                                -Dsonar.projectKey=test-v.1 \
                                 -Dsonar.sources=. \
                                 -Dsonar.host.url=${SONAR_HOST_URL} \
-                                -Dsonar.token=${SONAR_TOKEN} \
+                                -Dsonar.login=$SONAR_TOKEN \
                                 -Dsonar.exclusions=node_modules/**,coverage/**,**/*.test.js \
                                 -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
                                 -Dsonar.coverage.exclusions=**/*.test.js
-                        """
+                        '''
                     }
                 }
             }
@@ -104,6 +104,7 @@ pipeline {
         }
     }
 }
+
 
 
 
