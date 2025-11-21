@@ -40,11 +40,11 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withCredentials([string(credentialsId: 'sonar-test-v1', variable: 'SONAR_TOKEN')]) {
+                withCredentials([string(credentialsId: 'test', variable: 'SONAR_TOKEN')]) {
                     withSonarQubeEnv('SonarQube') {
                         sh """
                             npx sonar-scanner \
-                                -Dsonar.projectKey=test-v.1 \
+                                -Dsonar.projectKey=test \
                                 -Dsonar.sources=. \
                                 -Dsonar.host.url=${SONAR_HOST_URL} \
                                 -Dsonar.token=${SONAR_TOKEN} \
@@ -107,6 +107,7 @@ pipeline {
         }
     }
 }
+
 
 
 
