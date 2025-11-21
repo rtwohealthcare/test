@@ -81,10 +81,10 @@ pipeline {
                     passwordVariable: 'PASS'
                 )]) {
                     sh """
-                        echo "${PASS}" | docker login http://${REGISTRY_URL} -u "${USER}" --password-stdin
+                        echo "${PASS}" | docker login http://10.80.5.127:9082 -u "${USER}" --password-stdin
 
-                        docker push ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
-                        docker push ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:latest
+                        docker push 10.80.5.127:9082/docker-hosted/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push 10.80.5.127:9082/docker-hosted/${IMAGE_NAME}:latest
                     """
                 }
             }
@@ -106,3 +106,4 @@ pipeline {
         }
     }
 }
+
