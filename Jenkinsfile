@@ -9,7 +9,7 @@ pipeline {
     environment {
         SONAR_HOST_URL = 'http://10.80.5.127:9070'
 
-        REGISTRY_URL = '10.80.5.127:9062'
+        REGISTRY_URL = '10.80.5.127:9082'
         REGISTRY_REPO = 'docker-hosted'
         IMAGE_NAME = 'test-v1'
         IMAGE_TAG = "v${BUILD_NUMBER}"
@@ -68,7 +68,7 @@ pipeline {
                 sh """
                     docker build -t ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG} .
                     docker tag ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG} \
-                               ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:latest
+                              ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:latest
                 """
             }
         }
@@ -81,10 +81,10 @@ pipeline {
                     passwordVariable: 'PASS'
                 )]) {
                     sh """
-                        echo "${PASS}" | docker login http://10.80.5.127:9082 -u "${USER}" --password-stdin
+                        echo "${PASS}" | docker login http://${REGISTRY_URL} -u "${USER}" --password-stdin
 
-                        docker push 10.80.5.127:9082/docker-hosted/${IMAGE_NAME}:${IMAGE_TAG}
-                        docker push 10.80.5.127:9082/docker-hosted/${IMAGE_NAME}:latest
+                        docker push ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:latest
                     """
                 }
             }
