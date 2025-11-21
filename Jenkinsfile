@@ -9,8 +9,7 @@ pipeline {
     environment {
         SONAR_HOST_URL = 'http://10.80.5.127:9070'
 
-        REGISTRY_URL = '10.80.5.127:9082'
-        REGISTRY_REPO = 'docker-hosted'
+        REGISTRY_URL = '10.80.5.127:9062'
         IMAGE_NAME = 'test-v1'
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
@@ -66,9 +65,9 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh """
-                    docker build -t ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG} .
-                    docker tag ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG} \
-                              ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:latest
+                    docker build -t ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG} .
+                    docker tag ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG} \
+                              ${REGISTRY_URL}/${IMAGE_NAME}:latest
                 """
             }
         }
@@ -81,10 +80,10 @@ pipeline {
                     passwordVariable: 'PASS'
                 )]) {
                     sh """
-                        echo "${PASS}" | docker login http://${REGISTRY_URL} -u "${USER}" --password-stdin
+                        echo "${PASS}" | docker login ${REGISTRY_URL} -u "${USER}" --password-stdin
 
-                        docker push ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
-                        docker push ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:latest
+                        docker push ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${REGISTRY_URL}/${IMAGE_NAME}:latest
                     """
                 }
             }
@@ -95,15 +94,14 @@ pipeline {
                 sh """
                     docker rm -f test-v1 || true
 
-                    docker pull ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+                    docker pull ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
 
                     docker run -d \
                         --name test-v1 \
                         -p 3000:3000 \
-                        ${REGISTRY_URL}/${REGISTRY_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+                        ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
                 """
             }
         }
     }
 }
-
