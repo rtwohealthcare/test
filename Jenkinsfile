@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     tools {
+        jdk "java17"
         nodejs "Node18"
     }
 
@@ -105,8 +106,3 @@ pipeline {
         }
     }
 }
-
-
-
-
-
