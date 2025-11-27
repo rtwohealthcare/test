@@ -9,7 +9,7 @@ pipeline {
     environment {
         SONAR_HOST_URL = 'https://v2code.rtwohealthcare.com'
 
-        REGISTRY_URL = 'v2deploy.rtwohealthcare.com'
+        REGISTRY_URL = 'v2deploy.rtwohealthcare.com:9067'
         IMAGE_NAME = 'test-v1'
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
@@ -105,6 +105,7 @@ pipeline {
         }
     }
 }
+
 
 
 
