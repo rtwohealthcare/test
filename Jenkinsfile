@@ -9,8 +9,6 @@ pipeline {
     environment {
         SONAR_HOST_URL = 'https://v2code.rtwohealthcare.com'
 
-        REGISTRY_HOST = "v2dock.rtwohealthcare.com"
-        REGISTRY_PORT = "9067"
         REGISTRY_URL  = "v2dock.rtwohealthcare.com:9067"
         IMAGE_NAME = 'test-v1'
         IMAGE_TAG = "v${BUILD_NUMBER}"
@@ -46,7 +44,7 @@ pipeline {
                                 -Dsonar.projectKey=test \
                                 -Dsonar.sources=. \
                                 -Dsonar.host.url=${SONAR_HOST_URL} \
-                                -Dsonar.token=${SONAR_TOKEN} \
+                                -Dsonar.token=$SONAR_TOKEN \
                                 -Dsonar.exclusions=node_modules/**,coverage/**,**/*.test.js \
                                 -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
                                 -Dsonar.coverage.exclusions=**/*.test.js
@@ -68,8 +66,7 @@ pipeline {
             steps {
                 sh """
                     docker build -t ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG} .
-                    docker tag ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG} \
-                              ${REGISTRY_URL}/${IMAGE_NAME}:latest
+                    docker tag ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_URL}/${IMAGE_NAME}:latest
                 """
             }
         }
@@ -81,8 +78,9 @@ pipeline {
                     usernameVariable: 'USER',
                     passwordVariable: 'PASS'
                 )]) {
+
                     sh """
-                        echo "${PASS}" | docker login https://${REGISTRY_URL} \ -u "${USER}" --password-stdin
+                        echo "$PASS" | docker login https://${REGISTRY_URL} -u "$USER" --password-stdin
 
                         docker push ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
                         docker push ${REGISTRY_URL}/${IMAGE_NAME}:latest
@@ -107,18 +105,3 @@ pipeline {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
