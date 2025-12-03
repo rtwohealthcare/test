@@ -11,7 +11,7 @@ pipeline {
 
         // FIXED: Registry must be host:port of Nexus registry
         //REGISTRY_URL  = "v2dock.rtwohealthcare.com:9062"
-        REGISTRY_URL  = "127.0.0.1:5000"
+        REGISTRY_URL  = "v2dock.rtwohealthcare.com:9062"
 
         IMAGE_NAME = 'test-v1'
         IMAGE_TAG = "v${BUILD_NUMBER}"
@@ -110,4 +110,5 @@ pipeline {
         }
     }
 }
+
 
