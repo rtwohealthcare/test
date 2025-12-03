@@ -9,9 +9,8 @@ pipeline {
     environment {
         SONAR_HOST_URL = 'https://v2code.rtwohealthcare.com'
 
-        // FIXED: Registry must be host:port of Nexus registry
-        REGISTRY_URL  = "v2dock.rtwohealthcare.com:9062"
-
+        REGISTRY_URL  = "v2dock.rtwohealthcare.com"
+        //REGISTRY_URL  = "localhost:5000"
         IMAGE_NAME = 'test-v1'
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
@@ -75,21 +74,19 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-                withCredentials([usernamePassword(
+               /* withCredentials([usernamePassword(
                     credentialsId: 'nexus-docker-cred',
                     usernameVariable: 'USER',
                     passwordVariable: 'PASS'
-                )]) {
+                )]) { */
 
                     sh """
-                        echo "$PASS" | docker login ${REGISTRY_URL} -u "$USER" --password-stdin
+                       
 
                         docker push ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
                         docker push ${REGISTRY_URL}/${IMAGE_NAME}:latest
-
-                        docker logout ${REGISTRY_URL}
                     """
-                }
+               // } 
             }
         }
 
@@ -109,3 +106,12 @@ pipeline {
         }
     }
 }
+
+
+
+
+
+
+
+
+
