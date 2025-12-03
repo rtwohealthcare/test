@@ -80,7 +80,7 @@ pipeline {
                 )]) { */
 
                     sh """
-                        echo "$PASS" | docker login https://${REGISTRY_URL} -u "$USER" --password-stdin
+                       
 
                         docker push ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
                         docker push ${REGISTRY_URL}/${IMAGE_NAME}:latest
@@ -105,6 +105,7 @@ pipeline {
         }
     }
 }
+
 
 
 
