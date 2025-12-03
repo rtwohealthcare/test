@@ -8,9 +8,12 @@ pipeline {
 
     environment {
         SONAR_HOST_URL = 'https://v2code.rtwohealthcare.com'
-        REGISTRY_URL = "v2deploy.rtwohealthcare.com:9064"
+
+        // Nexus Docker registry (HTTP on 9062)
+        REGISTRY_HOST = "v2deploy.rtwohealthcare.com:9062"
+
         IMAGE_NAME = "test-v1"
-        IMAGE_TAG = "v${BUILD_NUMBER}"
+        IMAGE_TAG  = "v${BUILD_NUMBER}"
     }
 
     stages {
@@ -69,10 +72,12 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh """
+                    # Build local image
                     docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
-                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
-                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_URL}/${IMAGE_NAME}:latest
+                    # Tag for Nexus registry
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_HOST}/${IMAGE_NAME}:latest
                 """
             }
         }
@@ -84,15 +89,13 @@ pipeline {
                     usernameVariable: 'USER',
                     passwordVariable: 'PASS'
                 )]) {
-
                     sh """
-                        echo "$PASS" | docker login ${REGISTRY_URL} -u "$USER" --password-stdin
+                        echo "$PASS" | docker login ${REGISTRY_HOST} -u "$USER" --password-stdin
 
-                        docker push ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${REGISTRY_HOST}/${IMAGE_NAME}:latest
 
-                        docker push ${REGISTRY_URL}/${IMAGE_NAME}:latest
-
-                        docker logout ${REGISTRY_URL}
+                        docker logout ${REGISTRY_HOST}
                     """
                 }
             }
@@ -103,12 +106,12 @@ pipeline {
                 sh """
                     docker rm -f test-v1 || true
 
-                    docker pull ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
+                    docker pull ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
 
                     docker run -d \
                         --name test-v1 \
                         -p 3000:3000 \
-                        ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
+                        ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
                 """
             }
         }
