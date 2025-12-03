@@ -9,11 +9,10 @@ pipeline {
     environment {
         SONAR_HOST_URL = 'https://v2code.rtwohealthcare.com'
 
-        // FIXED: Registry must be host:port of Nexus registry
-        //REGISTRY_URL  = "v2dock.rtwohealthcare.com:9062"
-        REGISTRY_URL  = "v2deploy.rtwohealthcare.com:9064"
+        // Correct Nexus Docker registry
+        REGISTRY_URL = "v2deploy.rtwohealthcare.com:9064"
 
-        IMAGE_NAME = 'test-v1'
+        IMAGE_NAME = "test-v1"
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
 
@@ -24,7 +23,9 @@ pipeline {
         }
 
         stage('Install Dependencies') {
-            steps { sh 'npm install' }
+            steps {
+                sh 'npm install'
+            }
         }
 
         stage('Run Tests') {
@@ -33,6 +34,7 @@ pipeline {
                     if ! npm ls jest-environment-jsdom >/dev/null 2>&1; then
                         npm install jest-environment-jsdom@29.7.0 --no-save
                     fi
+
                     npm run test:coverage
                 '''
             }
@@ -68,8 +70,12 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh """
-                    docker build -t ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG} .
-                    docker tag ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_URL}/${IMAGE_NAME}:latest
+                    # Build local image
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+
+                    # Tag correctly for Nexus registry
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_URL}/${IMAGE_NAME}:latest
                 """
             }
         }
@@ -110,23 +116,3 @@ pipeline {
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
