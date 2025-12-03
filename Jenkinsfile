@@ -9,8 +9,8 @@ pipeline {
     environment {
         SONAR_HOST_URL = 'https://v2code.rtwohealthcare.com'
 
-        REGISTRY_URL  = "v2dock.rtwohealthcare.com"
-        //REGISTRY_URL  = "localhost:5000"
+        //REGISTRY_URL  = "v2dock.rtwohealthcare.com"
+        REGISTRY_URL  = "localhost:5000"
         IMAGE_NAME = 'test-v1'
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
