@@ -8,10 +8,7 @@ pipeline {
 
     environment {
         SONAR_HOST_URL = 'https://v2code.rtwohealthcare.com'
-
-        // Correct Nexus Docker registry
         REGISTRY_URL = "v2deploy.rtwohealthcare.com:9064"
-
         IMAGE_NAME = "test-v1"
         IMAGE_TAG = "v${BUILD_NUMBER}"
     }
@@ -19,7 +16,9 @@ pipeline {
     stages {
 
         stage('Checkout') {
-            steps { checkout scm }
+            steps {
+                checkout scm
+            }
         }
 
         stage('Install Dependencies') {
@@ -70,10 +69,8 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh """
-                    # Build local image
                     docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
-                    # Tag correctly for Nexus registry
                     docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
                     docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_URL}/${IMAGE_NAME}:latest
                 """
@@ -92,6 +89,7 @@ pipeline {
                         echo "$PASS" | docker login ${REGISTRY_URL} -u "$USER" --password-stdin
 
                         docker push ${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
+
                         docker push ${REGISTRY_URL}/${IMAGE_NAME}:latest
 
                         docker logout ${REGISTRY_URL}
