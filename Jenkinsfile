@@ -11,7 +11,7 @@ pipeline {
 
         // FIXED: Registry must be host:port of Nexus registry
         //REGISTRY_URL  = "v2dock.rtwohealthcare.com:9062"
-        REGISTRY_URL  = "10.80.5.127:5000"
+        REGISTRY_URL  = "http://v2deploy.rtwohealthcare.com/repository/docker-hosted/"
 
         IMAGE_NAME = 'test-v1'
         IMAGE_TAG = "v${BUILD_NUMBER}"
@@ -110,6 +110,7 @@ pipeline {
         }
     }
 }
+
 
 
 
