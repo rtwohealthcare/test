@@ -10,7 +10,7 @@ pipeline {
         SONAR_HOST_URL = 'https://v2code.rtwohealthcare.com'
 
         // Nexus Docker registry (HTTP on 9062)
-        REGISTRY_HOST = "v2deploy.rtwohealthcare.com:9062"
+        REGISTRY_HOST = "v2dock.rtwohealthcare.com:9062"
 
         IMAGE_NAME = "test-v1"
         IMAGE_TAG  = "v${BUILD_NUMBER}"
@@ -117,3 +117,4 @@ pipeline {
         }
     }
 }
+
