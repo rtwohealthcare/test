@@ -98,7 +98,7 @@ pipeline {
                 )]) {
                     sh """
                         # Login using DOCKER_REGISTRY_URL (Host:Port)
-                        echo "$PASS" | docker login ${DOCKER_REGISTRY_URL} -u "$USER" --password-stdin
+                        echo "$PASS" | docker login ${https://v2deploy.rtwohealthcare.com/repository/docker-hosted/} -u "$USER" --password-stdin
 
                         # Push using the full REGISTRY_HOST path
                         docker push ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
@@ -127,3 +127,4 @@ pipeline {
         }
     }
 }
+
