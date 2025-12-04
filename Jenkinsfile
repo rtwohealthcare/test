@@ -12,11 +12,11 @@ pipeline {
         // --- DOCKER REGISTRY FIX START ---
         // 1. DOCKER_REGISTRY_URL: Used for 'docker login' and 'docker logout' (Host:Port only)
         // Set to the correct host and non-standard port (9064 is used here based on your daemon.json)
-        DOCKER_REGISTRY_URL = "v2deploy.rtwohealthcare.com/repository/docker-hosted"
+        DOCKER_REGISTRY_URL = "v2deploy.rtwohealthcare.com"
         
         // 2. REGISTRY_HOST: Used for 'docker tag', 'docker push', and 'docker pull' (Host:Port/Path)
-       // REGISTRY_PATH = "/repository/docker-hosted"
-       // REGISTRY_HOST = "${DOCKER_REGISTRY_URL}${REGISTRY_PATH}"
+       REGISTRY_PATH = "/docker-hosted"
+       REGISTRY_HOST = "${DOCKER_REGISTRY_URL}${REGISTRY_PATH}"
 
         IMAGE_NAME = "test-v1"
         IMAGE_TAG  = "v${BUILD_NUMBER}"
@@ -83,8 +83,8 @@ pipeline {
                     docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
 
                     # Tag for Nexus registry using the full REGISTRY_HOST path
-                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
-                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:latest
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
+                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_HOST}/${IMAGE_NAME}:latest
                 """
             }
         }
@@ -101,8 +101,8 @@ pipeline {
                         echo "$PASS" | docker login ${DOCKER_REGISTRY_URL} -u "$USER" --password-stdin
 
                         # Push using the full REGISTRY_HOST path
-                        docker push ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
-                        docker push ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:latest
+                        docker push ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${REGISTRY_HOST}/${IMAGE_NAME}:latest
 
                         # Logout using DOCKER_REGISTRY_URL (Host:Port)
                         docker logout ${DOCKER_REGISTRY_URL}
@@ -116,17 +116,18 @@ pipeline {
                 sh """
                     docker rm -f test-v1 || true
 
-                    docker pull ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
+                    docker pull ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
 
                     docker run -d \\
                         --name test-v1 \\
                         -p 3000:3000 \\
-                        ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
+                        ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
                 """
             }
         }
     }
 }
+
 
 
 
