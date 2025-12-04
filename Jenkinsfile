@@ -9,8 +9,13 @@ pipeline {
     environment {
         SONAR_HOST_URL = 'https://v2code.rtwohealthcare.com'
 
-        // Nexus Docker registry (HTTP on 9062)
-        REGISTRY_HOST = "v2deploy.rtwohealthcare.com/repository/docker-hosted"
+        // Nexus Docker registry details
+        // Base URL for Docker Login
+        DOCKER_REGISTRY_URL = "v2deploy.rtwohealthcare.com" // Change to "v2deploy.rtwohealthcare.com:9062" if using HTTP on 9062
+        
+        // Full path for tagging images
+        REGISTRY_PATH = "/repository/docker-hosted"
+        REGISTRY_HOST = "${DOCKER_REGISTRY_URL}${REGISTRY_PATH}"
 
         IMAGE_NAME = "test-v1"
         IMAGE_TAG  = "v${BUILD_NUMBER}"
@@ -47,13 +52,13 @@ pipeline {
                 withCredentials([string(credentialsId: 'test', variable: 'SONAR_TOKEN')]) {
                     withSonarQubeEnv('SonarQube') {
                         sh """
-                            npx sonar-scanner \
-                                -Dsonar.projectKey=test \
-                                -Dsonar.sources=. \
-                                -Dsonar.host.url=${SONAR_HOST_URL} \
-                                -Dsonar.token=$SONAR_TOKEN \
-                                -Dsonar.exclusions=node_modules/**,coverage/**,**/*.test.js \
-                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                            npx sonar-scanner \\
+                                -Dsonar.projectKey=test \\
+                                -Dsonar.sources=. \\
+                                -Dsonar.host.url=${SONAR_HOST_URL} \\
+                                -Dsonar.token=$SONAR_TOKEN \\
+                                -Dsonar.exclusions=node_modules/**,coverage/**,**/*.test.js \\
+                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \\
                                 -Dsonar.coverage.exclusions=**/*.test.js
                         """
                     }
@@ -90,12 +95,14 @@ pipeline {
                     passwordVariable: 'PASS'
                 )]) {
                     sh """
-                        echo "$PASS" | docker login ${REGISTRY_HOST} -u "$USER" --password-stdin
+                        # Login using DOCKER_REGISTRY_URL (host:port)
+                        echo "$PASS" | docker login ${DOCKER_REGISTRY_URL} -u "$USER" --password-stdin
 
+                        # Push using the full REGISTRY_HOST path
                         docker push ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
                         docker push ${REGISTRY_HOST}/${IMAGE_NAME}:latest
 
-                        docker logout ${REGISTRY_HOST}
+                        docker logout ${DOCKER_REGISTRY_URL}
                     """
                 }
             }
@@ -108,18 +115,12 @@ pipeline {
 
                     docker pull ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
 
-                    docker run -d \
-                        --name test-v1 \
-                        -p 3000:3000 \
+                    docker run -d \\
+                        --name test-v1 \\
+                        -p 3000:3000 \\
                         ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
                 """
             }
         }
     }
 }
-
-
-
-
-
-
