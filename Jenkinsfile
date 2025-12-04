@@ -11,7 +11,7 @@ pipeline {
 
         // Nexus Docker registry details
         // Base URL for Docker Login
-        DOCKER_REGISTRY_URL = "v2deploy.rtwohealthcare.com" // Change to "v2deploy.rtwohealthcare.com:9062" if using HTTP on 9062
+        DOCKER_REGISTRY_URL = "v2deploy.rtwohealthcare.com:9062" // Change to "v2deploy.rtwohealthcare.com:9062" if using HTTP on 9062
         
         // Full path for tagging images
         REGISTRY_PATH = "/repository/docker-hosted"
@@ -124,3 +124,4 @@ pipeline {
         }
     }
 }
+
