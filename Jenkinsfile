@@ -12,7 +12,7 @@ pipeline {
         // --- DOCKER REGISTRY FIX START ---
         // 1. DOCKER_REGISTRY_URL: Used for 'docker login' and 'docker logout' (Host:Port only)
         // Set to the correct host and non-standard port (9064 is used here based on your daemon.json)
-        DOCKER_REGISTRY_URL = "https://v2deploy.rtwohealthcare.com/repository/docker-hosted/"
+        DOCKER_REGISTRY_URL = "v2deploy.rtwohealthcare.com/repository/docker-hosted"
         
         // 2. REGISTRY_HOST: Used for 'docker tag', 'docker push', and 'docker pull' (Host:Port/Path)
        // REGISTRY_PATH = "/repository/docker-hosted"
@@ -127,5 +127,6 @@ pipeline {
         }
     }
 }
+
 
 
