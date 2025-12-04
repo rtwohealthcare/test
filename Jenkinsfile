@@ -98,7 +98,7 @@ pipeline {
                 )]) {
                     sh """
                         # Login using DOCKER_REGISTRY_URL (Host:Port)
-                        echo "$PASS" | docker login ${REGISTRY_URL} -u "$USER" --password-stdin
+                        echo "$PASS" | docker login ${DOCKER_REGISTRY_URL} -u "$USER" --password-stdin
 
                         # Push using the full REGISTRY_HOST path
                         docker push ${DOCKER_REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}
@@ -127,6 +127,7 @@ pipeline {
         }
     }
 }
+
 
 
 
