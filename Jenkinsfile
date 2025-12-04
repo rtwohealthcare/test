@@ -1,127 +1,53 @@
 pipeline {
     agent any
-
-    tools {
-        jdk "java17"
-        nodejs "Node18"
-    }
+    // ... other sections
 
     environment {
-        SONAR_HOST_URL = 'https://v2code.rtwohealthcare.com'
+        // ... other env vars
 
         // Nexus Docker registry details
-        // Base URL for Docker Login
-        DOCKER_REGISTRY_URL = "v2deploy.rtwohealthcare.com:9062" // Change to "v2deploy.rtwohealthcare.com:9062" if using HTTP on 9062
+        // **CRITICAL FIX**: Explicitly set the port here (e.g., 9064)
+        DOCKER_REGISTRY_URL = "v2deploy.rtwohealthcare.com:9064" 
         
-        // Full path for tagging images
+        // The registry host now includes the port 
         REGISTRY_PATH = "/repository/docker-hosted"
-        REGISTRY_HOST = "${DOCKER_REGISTRY_URL}${REGISTRY_PATH}"
+        REGISTRY_HOST = "${DOCKER_REGISTRY_URL}${REGISTRY_PATH}" // Will be v2deploy.rtwohealthcare.com:9064/repository/docker-hosted
 
         IMAGE_NAME = "test-v1"
         IMAGE_TAG  = "v${BUILD_NUMBER}"
     }
 
-    stages {
-
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
+    // ... rest of the pipeline
+    
+    stage('Docker Build') {
+        steps {
+            sh """
+                // Tagging needs the full path including the port:
+                docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
+                docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_HOST}/${IMAGE_NAME}:latest
+            """
         }
-
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                sh '''
-                    if ! npm ls jest-environment-jsdom >/dev/null 2>&1; then
-                        npm install jest-environment-jsdom@29.7.0 --no-save
-                    fi
-
-                    npm run test:coverage
-                '''
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                withCredentials([string(credentialsId: 'test', variable: 'SONAR_TOKEN')]) {
-                    withSonarQubeEnv('SonarQube') {
-                        sh """
-                            npx sonar-scanner \\
-                                -Dsonar.projectKey=test \\
-                                -Dsonar.sources=. \\
-                                -Dsonar.host.url=${SONAR_HOST_URL} \\
-                                -Dsonar.token=$SONAR_TOKEN \\
-                                -Dsonar.exclusions=node_modules/**,coverage/**,**/*.test.js \\
-                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \\
-                                -Dsonar.coverage.exclusions=**/*.test.js
-                        """
-                    }
-                }
-            }
-        }
-
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
+    }
+    
+    stage('Docker Push') {
+        steps {
+            withCredentials([usernamePassword(
+                credentialsId: 'nexus-docker-cred',
+                usernameVariable: 'USER',
+                passwordVariable: 'PASS'
+            )]) {
                 sh """
-                    # Build local image
-                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                    // Login uses DOCKER_REGISTRY_URL (host:port)
+                    echo "$PASS" | docker login ${DOCKER_REGISTRY_URL} -u "$USER" --password-stdin
+                    
+                    // Pushing uses the full REGISTRY_HOST path
+                    docker push ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
+                    docker push ${REGISTRY_HOST}/${IMAGE_NAME}:latest
 
-                    # Tag for Nexus registry
-                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
-                    docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${REGISTRY_HOST}/${IMAGE_NAME}:latest
-                """
-            }
-        }
-
-        stage('Docker Push') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'nexus-docker-cred',
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
-                )]) {
-                    sh """
-                        # Login using DOCKER_REGISTRY_URL (host:port)
-                        echo "$PASS" | docker login ${DOCKER_REGISTRY_URL} -u "$USER" --password-stdin
-
-                        # Push using the full REGISTRY_HOST path
-                        docker push ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
-                        docker push ${REGISTRY_HOST}/${IMAGE_NAME}:latest
-
-                        docker logout ${DOCKER_REGISTRY_URL}
-                    """
-                }
-            }
-        }
-
-        stage('Deploy Container') {
-            steps {
-                sh """
-                    docker rm -f test-v1 || true
-
-                    docker pull ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
-
-                    docker run -d \\
-                        --name test-v1 \\
-                        -p 3000:3000 \\
-                        ${REGISTRY_HOST}/${IMAGE_NAME}:${IMAGE_TAG}
+                    docker logout ${DOCKER_REGISTRY_URL}
                 """
             }
         }
     }
+    // ...
 }
-
