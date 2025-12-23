@@ -92,7 +92,7 @@ pipeline {
         stage('Docker Push') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'nexus-docker-cred',
+                    credentialsId: 'docker-repo',
                     usernameVariable: 'USER',
                     passwordVariable: 'PASS'
                 )]) {
