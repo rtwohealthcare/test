@@ -15,7 +15,7 @@ pipeline {
         DOCKER_REGISTRY_URL = "v2deploy.rtwohealthcare.com"
         
         // 2. REGISTRY_HOST: Used for 'docker tag', 'docker push', and 'docker pull' (Host:Port/Path)
-       REGISTRY_PATH = "/docker-hosted"
+       REGISTRY_CREDENTIALS = 'docker-repo'
        REGISTRY_HOST = "${DOCKER_REGISTRY_URL}${REGISTRY_PATH}"
 
         IMAGE_NAME = "test-v1"
@@ -127,6 +127,7 @@ pipeline {
         }
     }
 }
+
 
 
 
