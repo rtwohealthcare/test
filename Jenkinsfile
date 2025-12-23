@@ -38,7 +38,6 @@ pipeline {
                     if ! npm ls jest-environment-jsdom >/dev/null 2>&1; then
                         npm install jest-environment-jsdom@29.7.0 --no-save
                     fi
-
                     npm run test:coverage
                 '''
             }
@@ -107,21 +106,31 @@ pipeline {
             }
         }
 
-        // ---------------- DEPLOY ----------------
+        // ---------------- DEPLOY (FIXED) ----------------
         stage('Deploy Container') {
             steps {
-                sh '''
-                    docker rm -f test-v1 || true
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-repo',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login ${DOCKER_REGISTRY} \
+                          -u "$DOCKER_USER" --password-stdin
 
-                    docker pull ${DOCKER_REGISTRY}/${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+                        docker rm -f test-v1 || true
 
-                    docker run -d \
-                      --name test-v1 \
-                      -p 3000:3000 \
-                      ${DOCKER_REGISTRY}/${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
-                '''
+                        docker pull ${DOCKER_REGISTRY}/${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+
+                        docker run -d \
+                          --name test-v1 \
+                          -p 3000:3000 \
+                          ${DOCKER_REGISTRY}/${DOCKER_REPO}/${IMAGE_NAME}:${IMAGE_TAG}
+
+                        docker logout ${DOCKER_REGISTRY}
+                    '''
+                }
             }
         }
     }
 }
-
